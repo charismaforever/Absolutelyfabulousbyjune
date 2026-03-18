@@ -8,43 +8,30 @@
     $('.icon-load').hide();
   });
 
-  /* ── 2. Lazy-load images (data-src → src) ── */
-  function lazyLoad() {
-    $('.js-img').each(function () {
-      var $img = $(this);
-      var src = $img.attr('data-src');
-      if (!src) return;
+  /* ── 2. Image loading: swap data-src → src (or background-image) ── */
+  function loadImages() {
+    /* Regular <img> tags with data-src */
+    $('img[data-src]').each(function () {
+      var src = $(this).attr('data-src');
+      if (src) {
+        $(this).attr('src', src).removeAttr('data-src');
+      }
+    });
 
-      var top = $img[0].getBoundingClientRect().top;
-      var winH = $(window).height();
-      if (top < winH + 200) {
-        if ($img.is('img')) {
-          $img.attr('src', src);
-        } else {
-          // background-image element (e.g. .discount, .load-bg)
-          $img.css('background-image', 'url(' + src + ')');
-        }
-        $img.removeAttr('data-src');
+    /* Non-img elements with data-src (div backgrounds like .discount, .info-blocks__item) */
+    $('[data-src]').not('img').each(function () {
+      var src = $(this).attr('data-src');
+      if (src) {
+        $(this).css('background-image', 'url(' + src + ')').removeAttr('data-src');
       }
     });
   }
 
-  /* Background images for non-img elements */
-  function loadBgImages() {
-    $('[data-src]').not('img').each(function () {
-      var $el = $(this);
-      var src = $el.attr('data-src');
-      if (!src) return;
-      $el.css('background-image', 'url(' + src + ')');
-      $el.removeAttr('data-src');
-    });
-  }
-
+  /* Run immediately on DOM ready and again after a short delay for any late elements */
   $(document).ready(function () {
-    lazyLoad();
-    loadBgImages();
+    loadImages();
+    setTimeout(loadImages, 300);
   });
-  $(window).on('scroll resize', lazyLoad);
 
   /* ── 3. Product tabs ── */
   $(document).ready(function () {
